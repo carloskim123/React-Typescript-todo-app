@@ -1,19 +1,24 @@
-import React, { useState } from "react";
-import TaskList from "./TaskList";
-import NewTaskForm from "./NewTaskForm";
+import React from "react";
+import useLocalStorage from "./useLocalStorage";
+import './style.css'
+
 interface Task {
   id: number;
   text: string;
   completed: boolean;
 }
-let nextTaskId = 1;
 
 const TodoApp: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useLocalStorage<Task[]>("tasks", []);
+  const [text, setText] = React.useState("");
 
-  const handleAddTask = (text: string) => {
-    const newTask: Task = { id: nextTaskId++, text, completed: false };
-    setTasks([...tasks, newTask]);
+  const handleAddTask = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (text.trim()) {
+      const newTask: Task = { id: Date.now(), text, completed: false };
+      setTasks([...tasks, newTask]);
+      setText("");
+    }
   };
 
   const handleDeleteTask = (id: number) => {
@@ -34,19 +39,47 @@ const TodoApp: React.FC = () => {
   return (
     <div className="todo-app">
       <h1>Todo App</h1>
-      <NewTaskForm onAddTask={handleAddTask} />
+      <form onSubmit={handleAddTask}>
+        <input
+          type="text"
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          placeholder="Enter a task"
+        />
+        <button type="submit">Add Task</button>
+      </form>
       <h2>Active Tasks</h2>
-      <TaskList
-        tasks={activeTasks}
-        onDeleteTask={handleDeleteTask}
-        onToggleTask={handleToggleTask}
-      />
+      <ul>
+        {activeTasks.map((task) => (
+          <li key={task.id}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => handleToggleTask(task.id)}
+            />
+            <span style={{ textDecoration: task.completed ? "line-through" : "none" }}>
+              {task.text}
+            </span>
+            <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
       <h2>Completed Tasks</h2>
-      <TaskList
-        tasks={completedTasks}
-        onDeleteTask={handleDeleteTask}
-        onToggleTask={handleToggleTask}
-      />
+      <ul>
+        {completedTasks.map((task) => (
+          <li key={task.id}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => handleToggleTask(task.id)}
+            />
+            <span style={{ textDecoration: task.completed ? "line-through" : "none" }}>
+              {task.text}
+            </span>
+            <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

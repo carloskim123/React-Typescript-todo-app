@@ -18,7 +18,8 @@ const TaskList: React.FC<TaskListProps> = ({
 }) => {
   return (
     <ul>
-      {tasks.map((task) => (
+      {tasks.map((task: Task) => (
+          tasks.length < 0 ? <div>None</div> :
         <li key={task.id}>
           <input
             type="checkbox"
